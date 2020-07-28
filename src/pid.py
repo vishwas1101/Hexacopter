@@ -1,29 +1,31 @@
-#-------------
-from math import * 
+# from math import * 
+import math
 import time
-import numpy as np
+# import numpy as np
 
-#--------------------------------------------------------------------------------------------------------------------------------------
+
 def PID(x, y, z, roll, pitch, yaw, f):
-	#Define the global variables to prevent them from dying and resetting to zero, each time a function call occurs. Some of these variables 		may be redundant.
+	# Define the global variables to prevent them from dying and resetting to zero, each time a function call occurs. Some of these variables may be redundant.
 	global kp_roll, ki_roll, kd_roll, kp_pitch, ki_pitch, kd_pitch, kp_yaw, ki_yaw, kd_yaw, prevErr_roll, prevErr_pitch, prevErr_yaw, pMem_roll, pMem_yaw, pMem_pitch, iMem_roll, iMem_pitch, iMem_yaw, dMem_roll, dMem_pitch, dMem_yaw, flag, setpointroll, setpointpitch, setpointyaw, sampleTime, setpointz, kp_z, ki_z, kd_z, prevErr_z, pMem_z, iMem_z, dMem_z, Ryaw, Rroll, Rpitch, setpointx, setpointy, setpointz, kd_x, kd_y, kp_x, kp_y, ki_x, ki_y, prevErr_x, prevErr_y, pMem_x, pMem_y, iMem_x, iMem_y, dMem_y, dMem_x 
 
-	#-----------------------
-	#Assign your PID values here. From symmetry, control for roll and pitch is the same
+	# Assign your PID values here. From symmetry, control for roll and pitch is the same
 
-	
 	kp_roll = 70
 	ki_roll = 0
 	kd_roll = 89
+
 	kp_pitch = kp_roll
 	ki_pitch = ki_roll
 	kd_pitch = kd_roll
+
 	kp_z = 1500
 	ki_z = 0.0002
 	kd_z = 100
+
 	kp_yaw = 70
 	ki_yaw = 0
 	kd_yaw = 89
+
 	flag = 0
 	sampleTime = 0
 
@@ -39,12 +41,12 @@ def PID(x, y, z, roll, pitch, yaw, f):
 	setpointpitch = 0
 	setpointyaw = 0
 
-	err_pitch = float(pitch)*(180 / 3.141592653) - setpointpitch
- 	err_roll = float(roll)*(180 / 3.141592653) - setpointroll
-	err_yaw = float(yaw)*(180/3.14159263) - setpointyaw
+	err_pitch = math.degrees(pitch) - setpointpitch
+	err_roll  = math.degrees(roll)  - setpointroll
+	err_yaw   = math.degrees(yaw)   - setpointyaw
 	
 	currTime = time.time()
-	#-----------------------
+
 	#Reset the following variables during the first run only.
 	if flag == 0:
 		prevTime = 0
@@ -80,8 +82,8 @@ def PID(x, y, z, roll, pitch, yaw, f):
 		dMem_z = 0
 
 		flag += 1
-	#------------------------
-	#Define dt, dy(t) here for kd calculations.
+
+	# Define dt, dy(t) here for kd calculations.
 	dTime = currTime - prevTime
 
 	dErr_pitch = err_pitch - prevErr_pitch
@@ -90,10 +92,9 @@ def PID(x, y, z, roll, pitch, yaw, f):
 
 	dErr_z = err_z - prevErr_z
 	
-	#-------------------------------------------------------------------------------------------------------------------------------
-	#This is the Heart of the PID algorithm. PID behaves more accurately, if it is sampled at regular intervals. You can change the sampleTime to whatever value is suitable for your plant.
+	# This is the Heart of the PID algorithm. PID behaves more accurately, if it is sampled at regular intervals. You can change the sampleTime to whatever value is suitable for your plant.
 	if(dTime >= sampleTime):
-		#Kp*e(t)
+		# Kp*e(t)
 		pMem_roll = kp_roll * err_roll
 		pMem_pitch = kp_pitch * err_pitch
 		pMem_yaw = kp_yaw * err_yaw
@@ -101,7 +102,7 @@ def PID(x, y, z, roll, pitch, yaw, f):
 
 		pMem_z = kp_z * err_z
 		
-		#integral(e(t))
+		# integral(e(t))
 		iMem_roll += err_pitch * dTime
 		iMem_pitch += err_roll * dTime
 		iMem_yaw += err_yaw * dTime
@@ -119,7 +120,7 @@ def PID(x, y, z, roll, pitch, yaw, f):
 		if(iMem_z < -400): iMem_z = -400
 
 		
-		#derivative(e(t))
+		# derivative(e(t))
 		dMem_roll = dErr_roll / dTime
 		dMem_pitch = dErr_pitch / dTime
 		dMem_yaw = dErr_yaw / dTime
@@ -127,7 +128,7 @@ def PID(x, y, z, roll, pitch, yaw, f):
 
 		dMem_z = dErr_z / dTime
 	
-	#Store the current variables into previous variables for the next iteration.
+	# Store the current variables into previous variables for the next iteration.
 	prevTime = currTime
 
 	prevErr_roll = err_roll
@@ -136,7 +137,7 @@ def PID(x, y, z, roll, pitch, yaw, f):
 
 	prevErr_z = err_z
 	
-	#output = Kp*e(t) + Ki*integral(e(t)) + Kd*derivative(e(t))
+	# output = Kp*e(t) + Ki*integral(e(t)) + Kd*derivative(e(t))
 	output_roll = pMem_roll + ki_roll * iMem_roll + kd_roll * dMem_roll
 	output_pitch = pMem_pitch + ki_pitch * iMem_pitch + kd_pitch * dMem_pitch
 	output_yaw = pMem_yaw + ki_yaw * iMem_yaw + kd_yaw * dMem_yaw 
@@ -256,9 +257,8 @@ def PID(x, y, z, roll, pitch, yaw, f):
 	elif(err_roll < 0 && err_pitch > 0):
 	'''	
 	#---------------------------------------------------------------------------------------------------------------------------------
-	#Provide the motor velocities to the object 'f' that will now exit out of this function, and gets published to gazebo, providing velocities to each motor. Note that the sign here is +,-,+,- i.e CW, CCW, CW, CCW in gazebo model. Change view of gazebo model (by scrolling) such that the green line comes to your left, red line goes forward, and blue line goes upward. This is the convention that i refer to as "Gazebo model" incase you get confused.
+	# Provide the motor velocities to the object 'f' that will now exit out of this function, and gets published to gazebo, providing velocities to each motor. Note that the sign here is +,-,+,- i.e CW, CCW, CW, CCW in gazebo model. Change view of gazebo model (by scrolling) such that the green line comes to your left, red line goes forward, and blue line goes upward. This is the convention that i refer to as "Gazebo model" incase you get confused.
 	f.data = [fr_motor_vel, -fl_motor_vel, l_motor_vel, -bl_motor_vel, br_motor_vel, -r_motor_vel]
 	
-	#Return these variables back to the control file.
+	# Return these variables back to the control file.
 	return f, err_roll, err_pitch, err_yaw, err_x, err_y, err_z
-#--------------------------------------------------------------------------------------------------------------------------------------

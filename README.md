@@ -89,7 +89,7 @@ This should load the Quadcopter into Gazebo simulator. You may get some errors o
 
 For the quadCopter to just hover in mid-air, open another terminal and type in the following command
 ```
-rosrun fly_bot controlnew.py
+rosrun fly_bot control.py
 ```
 
 You should see the Quadcopter fly upwards while stabilizing itself.
@@ -115,4 +115,4 @@ vi) -50 units to right_motor
 Here, the negative sign denotes rotation in the opposite direction.
 
 
-The pid values are in the /src/pidnew.py file in your fly_bot directory. Play around with the values to see some control theory in action!
+The pid values are in the /src/pid.py file in your fly_bot directory. Play around with the values to see some control theory in action!
